@@ -1,0 +1,85 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "ProductsAjax";
+}
+@model List<Product>
+<h1>Products</h1>
+<table class="table" id="productsTable">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        @*<th>Actions</th>*@
+    </tr>
+    @foreach (Product p in Model)
+    {
+        <tr>
+            <td>@p.Id</td>
+            <td>@p.Name</td>
+            <td>@p.Price</td>
+            @* <td>
+                <a class="btn btn-warning" asp-action="Edit" asp-route-id="@p.Id">Edit</a>
+            </td> *@
+        </tr>
+    }
+</table>
+
+<h1>Create Product</h1>
+<form id="createProductForm" asp-action="Create">
+    <div class="mb-3">
+        <label class="form-label" for="Cname"></label>
+        <input class="form-control" id="Cname" name="Name" type="text" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="Cprice"></label>
+        <input class="form-control" id="Cprice" name="Price" type="text" />
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+</form>
+
+<script>
+    // Abfangen des Submit-Events, um einen Seitenreload zu vermeiden
+    document.getElementById("createProductForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Eingaben erfassen
+        let name = document.getElementById("Cname").value;
+        let price = document.getElementById("Cprice").value;
+
+        // JSON-Daten erstellen
+        let data = JSON.stringify({ Name: name, Price: price });
+
+        // XMLHttpRequest anlegen und konfigurieren
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/ProductAjax/Create", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = function () {
+            let response = JSON.parse(this.responseText);
+            if (response.success) {
+                // Neues Produkt der Tabelle hinzufügen
+                let table = document.getElementById("productsTable");
+                let newRow = table.insertRow(-1);
+                let cellId = newRow.insertCell(0);
+                let cellName = newRow.insertCell(1);
+                let cellPrice = newRow.insertCell(2);
+                //let cellActions = newRow.insertCell(3);
+
+                cellId.innerHTML = response.product.id; // Annahme: Produkt enthält eine Id
+                cellName.innerHTML = response.product.name;
+                cellPrice.innerHTML = response.product.price;
+                //cellActions.innerHTML = '<a class="btn btn-warning" href="/Product/Edit/' + response.product.Id + '">Edit</a>';
+
+                // Formularfelder zurücksetzen
+                document.getElementById("createProductForm").reset();
+            }
+            else {
+                alert("Fehler: " + response.message);
+            }
+        };
+
+        // Request senden
+        xhr.send(data);
+    });
+</script>

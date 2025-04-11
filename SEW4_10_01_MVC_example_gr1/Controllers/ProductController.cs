@@ -47,5 +47,12 @@ namespace SEW4_10_01_MVC_example_gr1.Controllers
             }
             return View(product);
         }
+        public IActionResult Delete(int id)
+        {
+            Product? product = _context.Products.Find(id);
+            if (product == null) { return NotFound(); }
+            _context.Products.Remove(product);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
